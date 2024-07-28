@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "esbenp.prettier-vscode",
+        "DeepScan.vscode-deepscan",
+        "dbaeumer.vscode-eslint",
+        "aaron-bond.better-comments",
+        "GitHub.vscode-github-actions"
+    ]
+}
