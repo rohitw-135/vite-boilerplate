@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Select from 'react-select';
 import { useQueryClient } from 'react-query';
-import { useGetWordDefinition, useDeleteWord, useEditWord, useGetDefinitionByWord } from '../../services/wordService';
-import { SelectedType, WordAPIResponseType } from './typings';
 import { AddWord, EditWord } from '../../components';
 import { useWordContext } from '../../context';
+import { useGetWordInfo } from '../../hooks';
+import { useDeleteWord, useEditWord, useGetDefinitionByWord } from '../../services/wordService';
+import { SelectedType, WordAPIResponseType } from './typings';
 
 const WordDefinition: React.FC = () => {
     const queryClient = useQueryClient();
@@ -12,10 +13,21 @@ const WordDefinition: React.FC = () => {
     const [definition, setDefinition] = useState<string | null>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>('');
+
     // word value from context
     const { setWord } = useWordContext();
+    const { wordsData, wordsLoading, wordsError } = useGetWordInfo();
 
-    const { data: wordsData, isLoading: wordsLoading, error: wordsError } = useGetWordDefinition();
+    // select dropdown options
+    const options = wordsData
+        ? wordsData.map((word: WordAPIResponseType) => ({
+              value: word.word,
+              label: word.word,
+              id: word.id
+          }))
+        : [];
+
+    // mutated calls
     const deleteWordDefinition = useDeleteWord(queryClient);
     const editWordDefinition = useEditWord(queryClient);
     const getDefByWord = useGetDefinitionByWord(queryClient);
@@ -71,15 +83,6 @@ const WordDefinition: React.FC = () => {
 
     if (wordsLoading) return <div>Loading words...</div>;
     if (wordsError) return <div>Error loading words</div>;
-
-    // select dropdown options
-    const options = wordsData
-        ? wordsData.map((word: WordAPIResponseType) => ({
-              value: word.word,
-              label: word.word,
-              id: word.id
-          }))
-        : [];
 
     return (
         <div>
