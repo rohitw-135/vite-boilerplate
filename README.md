@@ -1,10 +1,8 @@
-# react-boilerplate
-Updated boilerplate with latest version of react
-
-`npm degit rohitw-135/vite-boilerplate#main ProjectName`
-
 # VITE-boilerplate
 Updated boilerplate with latest version of React
+
+run below command to use this as a template
+`npm degit rohitw-135/vite-boilerplate#main ProjectName`
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
