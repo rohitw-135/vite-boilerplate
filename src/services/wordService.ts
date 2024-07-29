@@ -10,7 +10,7 @@ export const getWordDefinition = async (word?: string) => {
     return response.json();
 };
 
-export const useGetWordDefinition = (word?: string) => useQuery(['wordsList', word], () => getWordDefinition(word));
+export const useGetWordDefinition = () => useQuery(['wordsList'], () => getWordDefinition());
 
 // mutated get definition by word
 export const useGetDefinitionByWord = (queryClient: QueryClient) =>
