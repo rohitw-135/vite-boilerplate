@@ -1,7 +1,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import ReactDOM from 'react-dom/client';
-import './../global.css';
+import './../global.less';
 import Pages from './pages';
 
 const queryClient = new QueryClient({

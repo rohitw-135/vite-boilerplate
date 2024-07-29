@@ -6,6 +6,7 @@ import { useWordContext } from '../../context';
 import { useGetWordInfo } from '../../hooks';
 import { useDeleteWord, useEditWord, useGetDefinitionByWord } from '../../services/wordService';
 import { SelectedType, WordAPIResponseType } from './typings';
+import styles from './index.module.less';
 
 const WordDefinition: React.FC = () => {
     const queryClient = useQueryClient();
@@ -86,11 +87,20 @@ const WordDefinition: React.FC = () => {
 
     return (
         <div>
-            <h1>Dictionary App</h1>
-            <Select options={options} onChange={handleSelectChange} isClearable placeholder="Select a word" />
-            <button onClick={handleSearch} disabled={loading}>
-                {loading ? 'Loading...' : 'Search'}
-            </button>
+            <h1 className={styles.apptitle}>Dictionary App</h1>
+            <div className={styles.row}>
+                <Select
+                    className={styles.select}
+                    options={options}
+                    onChange={handleSelectChange}
+                    isClearable
+                    placeholder="Select a word"
+                />
+                <button onClick={handleSearch} disabled={loading}>
+                    {loading ? 'Loading...' : 'Search'}
+                </button>
+            </div>
+
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {definition && <p>Definition: {definition}</p>}
             <EditWord
