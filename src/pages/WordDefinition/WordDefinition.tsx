@@ -1,32 +1,43 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Select from 'react-select';
 import { useQueryClient } from 'react-query';
-import { AddWord, EditWord } from '../../components';
-import { useWordContext } from '../../context';
+import { useNavigate } from 'react-router-dom';
+import { EditWord } from '../../components';
 import { useGetWordInfo } from '../../hooks';
 import { useDeleteWord, useEditWord, useGetDefinitionByWord } from '../../services/wordService';
 import { SelectedType, WordAPIResponseType } from './typings';
 import styles from './index.module.less';
+import { WordContext } from '../../context';
 
 const WordDefinition: React.FC = () => {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [selectedWord, setSelectedWord] = useState<SelectedType | null>();
     const [definition, setDefinition] = useState<string | null>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>('');
 
-    // word value from context
-    const { setWord } = useWordContext();
+    const [word, setWord] = useState('');
+    const contextValue = useMemo(
+        () => ({
+            word,
+            setWord
+        }),
+        [word]
+    );
+
     const { wordsData, wordsLoading, wordsError } = useGetWordInfo();
 
     // select dropdown options
-    const options = wordsData
-        ? wordsData.map((word: WordAPIResponseType) => ({
-              value: word.word,
-              label: word.word,
-              id: word.id
-          }))
-        : [];
+    const options = useMemo(
+        () =>
+            wordsData?.map((word: WordAPIResponseType) => ({
+                value: word.word,
+                label: word.word,
+                id: word.id
+            })),
+        [wordsData]
+    );
 
     // mutated calls
     const deleteWordDefinition = useDeleteWord(queryClient);
@@ -34,15 +45,18 @@ const WordDefinition: React.FC = () => {
     const getDefByWord = useGetDefinitionByWord(queryClient);
 
     // handles selection change
-    const handleSelectChange = (selectedOption: SelectedType | null) => {
-        // sets selected word object
-        setSelectedWord(selectedOption || {});
-        // sets context values
-        setWord(selectedOption?.value || '');
-    };
+    const handleSelectChange = useCallback(
+        (selectedOption: SelectedType | null) => {
+            // sets selected word object
+            setSelectedWord(selectedOption || {});
+            // sets context values
+            setWord(selectedOption?.value || '');
+        },
+        [setWord]
+    );
 
     // fetches selected word definition
-    const fetchDefinition = async () => {
+    const fetchDefinition = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -56,14 +70,14 @@ const WordDefinition: React.FC = () => {
             setError('Error fetching definition.');
         }
         setLoading(false);
-    };
+    }, [getDefByWord, selectedWord?.value]);
 
     // handles clicking of search button
     const handleSearch = () => {
         fetchDefinition();
     };
 
-    const handleEditWord = async () => {
+    const handleEditWord = useCallback(async () => {
         if (selectedWord) {
             await editWordDefinition.mutateAsync({
                 id: selectedWord?.id,
@@ -72,45 +86,51 @@ const WordDefinition: React.FC = () => {
             setSelectedWord({});
             setDefinition('');
         }
-    };
+    }, [definition, editWordDefinition, selectedWord]);
 
-    const handleDeleteWord = async () => {
+    const handleDeleteWord = useCallback(async () => {
         if (selectedWord) {
             await deleteWordDefinition.mutateAsync(selectedWord?.id);
             setSelectedWord({});
             setDefinition('');
         }
-    };
+    }, [deleteWordDefinition, selectedWord]);
+
+    const handleAddNewWord = useCallback(() => {
+        navigate('/add_word');
+    }, [navigate]);
 
     if (wordsLoading) return <div>Loading words...</div>;
     if (wordsError) return <div>Error loading words</div>;
 
     return (
-        <div>
-            <h1 className={styles.apptitle}>Dictionary App</h1>
-            <div className={styles.row}>
-                <Select
-                    className={styles.select}
-                    options={options}
-                    onChange={handleSelectChange}
-                    isClearable
-                    placeholder="Select a word"
-                />
-                <button onClick={handleSearch} disabled={loading}>
-                    {loading ? 'Loading...' : 'Search'}
-                </button>
-            </div>
+        <WordContext.Provider value={contextValue}>
+            <div>
+                <button onClick={handleAddNewWord}>Add New Word</button>
+                <h1 className={styles.apptitle}>Dictionary App</h1>
+                <div className={styles.row}>
+                    <Select
+                        className={styles.select}
+                        options={options}
+                        onChange={handleSelectChange}
+                        isClearable
+                        placeholder="Select a word"
+                    />
+                    <button onClick={handleSearch} disabled={loading}>
+                        {loading ? 'Loading...' : 'Search'}
+                    </button>
+                </div>
 
-            {error && <p className={styles.errormsg}>{error}</p>}
-            {definition && <p>Definition: {definition}</p>}
-            <EditWord
-                definition={definition}
-                setDefinition={setDefinition}
-                handleEditWord={handleEditWord}
-                handleDeleteWord={handleDeleteWord}
-            />
-            <AddWord />
-        </div>
+                {error && <p className={styles.errormsg}>{error}</p>}
+                {definition && <p>Definition: {definition}</p>}
+                <EditWord
+                    definition={definition}
+                    setDefinition={setDefinition}
+                    handleEditWord={handleEditWord}
+                    handleDeleteWord={handleDeleteWord}
+                />
+            </div>
+        </WordContext.Provider>
     );
 };
 

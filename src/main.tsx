@@ -2,7 +2,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import ReactDOM from 'react-dom/client';
 import './../global.less';
-import Pages from './pages';
+import Flows from './routes';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-            <Pages />
+            <Flows />
         </QueryClientProvider>
     </React.StrictMode>
 );
