@@ -5,9 +5,9 @@ module.exports = {
     printWidth: 120,
     overrides: [
         {
-            files: '*.yml',
+            files: '.prettierrc',
             options: {
-                tabWidth: 2
+                parser: 'json'
             }
         }
     ]
