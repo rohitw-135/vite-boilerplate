@@ -1,0 +1,20 @@
+{
+    "files.eol": "\n",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+
+    "prettier.trailingComma": "none",
+    "prettier.tabWidth": 4,
+    "prettier.singleQuote": true,
+    "prettier.printWidth": 120,
+    "prettier.useTabs": false,
+
+    "deepscan.enable": true,
+
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    "eslint.validate": ["javascript", "typescript"],
+    "material-icon-theme.activeIconPack": "react",
+    "material-icon-theme.languages.associations": {}
+}
