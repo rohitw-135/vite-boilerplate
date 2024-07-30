@@ -101,7 +101,7 @@ const WordDefinition: React.FC = () => {
                 </button>
             </div>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p className={styles.errormsg}>{error}</p>}
             {definition && <p>Definition: {definition}</p>}
             <EditWord
                 definition={definition}
