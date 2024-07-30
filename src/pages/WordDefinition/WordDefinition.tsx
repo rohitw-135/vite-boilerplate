@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Select from 'react-select';
 import { useQueryClient } from 'react-query';
 import { AddWord, EditWord } from '../../components';
@@ -20,13 +20,15 @@ const WordDefinition: React.FC = () => {
     const { wordsData, wordsLoading, wordsError } = useGetWordInfo();
 
     // select dropdown options
-    const options = wordsData
-        ? wordsData.map((word: WordAPIResponseType) => ({
-              value: word.word,
-              label: word.word,
-              id: word.id
-          }))
-        : [];
+    const options = useMemo(
+        () =>
+            wordsData?.map((word: WordAPIResponseType) => ({
+                value: word.word,
+                label: word.word,
+                id: word.id
+            })),
+        [wordsData]
+    );
 
     // mutated calls
     const deleteWordDefinition = useDeleteWord(queryClient);
@@ -34,15 +36,18 @@ const WordDefinition: React.FC = () => {
     const getDefByWord = useGetDefinitionByWord(queryClient);
 
     // handles selection change
-    const handleSelectChange = (selectedOption: SelectedType | null) => {
-        // sets selected word object
-        setSelectedWord(selectedOption || {});
-        // sets context values
-        setWord(selectedOption?.value || '');
-    };
+    const handleSelectChange = useCallback(
+        (selectedOption: SelectedType | null) => {
+            // sets selected word object
+            setSelectedWord(selectedOption || {});
+            // sets context values
+            setWord(selectedOption?.value || '');
+        },
+        [setWord]
+    );
 
     // fetches selected word definition
-    const fetchDefinition = async () => {
+    const fetchDefinition = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -56,14 +61,14 @@ const WordDefinition: React.FC = () => {
             setError('Error fetching definition.');
         }
         setLoading(false);
-    };
+    }, [getDefByWord, selectedWord?.value]);
 
     // handles clicking of search button
     const handleSearch = () => {
         fetchDefinition();
     };
 
-    const handleEditWord = async () => {
+    const handleEditWord = useCallback(async () => {
         if (selectedWord) {
             await editWordDefinition.mutateAsync({
                 id: selectedWord?.id,
@@ -72,15 +77,15 @@ const WordDefinition: React.FC = () => {
             setSelectedWord({});
             setDefinition('');
         }
-    };
+    }, [definition, editWordDefinition, selectedWord]);
 
-    const handleDeleteWord = async () => {
+    const handleDeleteWord = useCallback(async () => {
         if (selectedWord) {
             await deleteWordDefinition.mutateAsync(selectedWord?.id);
             setSelectedWord({});
             setDefinition('');
         }
-    };
+    }, [deleteWordDefinition, selectedWord]);
 
     if (wordsLoading) return <div>Loading words...</div>;
     if (wordsError) return <div>Error loading words</div>;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { useAddWord } from '../../services/wordService';
 
@@ -10,7 +10,7 @@ const AddWord: React.FC = () => {
     const addWordDefinition = useAddWord(queryClient);
 
     // handles adding a word
-    const handleAddWord = async () => {
+    const handleAddWord = useCallback(async () => {
         if (word && definition) {
             await addWordDefinition.mutateAsync({
                 word,
@@ -19,7 +19,7 @@ const AddWord: React.FC = () => {
             setWord('');
             setDefinition('');
         }
-    };
+    }, [addWordDefinition, definition, word]);
 
     return (
         <div>
