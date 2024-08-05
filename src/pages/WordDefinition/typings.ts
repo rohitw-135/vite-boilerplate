@@ -9,3 +9,7 @@ export interface SelectedType {
     value?: string;
     label?: string;
 }
+
+export interface DefinationType {
+    defination?: string;
+}
