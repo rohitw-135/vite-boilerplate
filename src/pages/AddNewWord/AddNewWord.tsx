@@ -1,44 +1,54 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAddWord } from '../../services/wordService';
+import { useForm } from 'react-hook-form';
+import { Inputs } from './typings';
 
 const AddNewWord: React.FC = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    // states to manage input for word and definition
-    const [word, setWord] = useState<string | undefined>();
-    const [definition, setDefinition] = useState<string | undefined>();
     const addWordDefinition = useAddWord(queryClient);
-
-    // handles adding a word
-    const handleAddWord = useCallback(async () => {
-        if (word && definition) {
-            await addWordDefinition.mutateAsync({
-                word,
-                definition
-            });
-            setWord('');
-            setDefinition('');
-        }
-    }, [addWordDefinition, definition, word]);
+    const { register, handleSubmit } = useForm<Inputs>();
 
     const handleBack = useCallback(() => {
         navigate('/');
     }, [navigate]);
 
+    // handles adding a word
+    const handleAddWord = useCallback(
+        async (data: Inputs) => {
+            try {
+                if (data?.word && data?.defination) {
+                    const res = await addWordDefinition.mutateAsync({
+                        word: data?.word,
+                        definition: data?.defination
+                    });
+                    if (res?.id) {
+                        alert('New word added successfully!');
+                        handleBack();
+                    }
+                }
+            } catch (err) {
+                alert(err);
+            }
+        },
+        [addWordDefinition, handleBack]
+    );
+
     return (
         <div>
-            <button onClick={handleBack}>Back</button>
-            <h2>Add New Word</h2>
-            <input type="text" value={word} onChange={(e) => setWord(e.target.value)} placeholder="Enter new word" />
-            <input
-                type="text"
-                value={definition}
-                onChange={(e) => setDefinition(e.target.value)}
-                placeholder="Enter it's definition"
-            />
-            <button onClick={handleAddWord}>Add This Word</button>
+            <form onSubmit={handleSubmit(handleAddWord)}>
+                <button onClick={handleBack}>Back</button>
+                <h2>Add New Word</h2>
+                <input type="text" placeholder="Enter new word" {...register('word', { required: true })} />
+                <input
+                    type="text"
+                    placeholder="Enter it's definition"
+                    {...register('defination', { required: true })}
+                />
+                <input type="submit" />
+            </form>
         </div>
     );
 };

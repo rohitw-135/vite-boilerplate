@@ -1,24 +1,39 @@
+import { Controller, useForm } from 'react-hook-form';
 import { useWordContext } from '../../context';
+import { useEffect } from 'react';
+import { DefinationType } from '../../pages/WordDefinition/typings';
 
 type EditWordProps = {
     definition: string | null;
     setDefinition: (defintion: string | null) => void;
-    handleEditWord: () => void;
+    handleEditWord: (data: DefinationType) => void;
     handleDeleteWord: () => void;
 };
 
-const EditWord = ({ definition, setDefinition, handleEditWord, handleDeleteWord }: EditWordProps) => {
+const EditWord = ({ definition, handleEditWord, handleDeleteWord }: EditWordProps) => {
     const { word } = useWordContext();
+    const { control, handleSubmit, setValue } = useForm({
+        defaultValues: {
+            defination: definition || ''
+        }
+    });
+    useEffect(() => {
+        setValue('defination', definition || '');
+    }, [definition, setValue]);
     return (
         <div>
             <h2>{`Word Being Edited ${`${word ? `:- (${word})` : ''}`}`}</h2>
-            <input
-                type="text"
-                value={definition || ''}
-                onChange={(e) => setDefinition(e.target.value)}
-                placeholder="Edit definition"
+            <Controller
+                control={control}
+                rules={{
+                    required: true
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                    <input onBlur={onBlur} onChange={onChange} value={value} placeholder="Edit definition" />
+                )}
+                name="defination"
             />
-            <button onClick={handleEditWord}>Edit</button>
+            <button onClick={handleSubmit(handleEditWord)}>Edit</button>
             <button onClick={handleDeleteWord}>Delete</button>
         </div>
     );

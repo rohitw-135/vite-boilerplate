@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { EditWord } from '../../components';
 import { useGetWordInfo } from '../../hooks';
 import { useDeleteWord, useEditWord, useGetDefinitionByWord } from '../../services/wordService';
-import { SelectedType, WordAPIResponseType } from './typings';
+import { DefinationType, SelectedType, WordAPIResponseType } from './typings';
 import styles from './index.module.less';
 import { WordContext } from '../../context';
 
@@ -74,25 +74,43 @@ const WordDefinition: React.FC = () => {
 
     // handles clicking of search button
     const handleSearch = () => {
-        fetchDefinition();
+        if (selectedWord?.id) {
+            fetchDefinition();
+        }
     };
 
-    const handleEditWord = useCallback(async () => {
-        if (selectedWord) {
-            await editWordDefinition.mutateAsync({
-                id: selectedWord?.id,
-                definition: definition || null
-            });
-            setSelectedWord({});
-            setDefinition('');
-        }
-    }, [definition, editWordDefinition, selectedWord]);
+    const handleEditWord = useCallback(
+        async (data: DefinationType) => {
+            try {
+                if (selectedWord) {
+                    const res = await editWordDefinition.mutateAsync({
+                        id: selectedWord?.id,
+                        definition: data?.defination || null
+                    });
+                    if (res) {
+                        alert('Work edited successfully!');
+                        setDefinition('');
+                        setSelectedWord({});
+                    }
+                }
+            } catch (err) {
+                alert(err);
+            }
+        },
+        [editWordDefinition, selectedWord]
+    );
 
     const handleDeleteWord = useCallback(async () => {
-        if (selectedWord) {
-            await deleteWordDefinition.mutateAsync(selectedWord?.id);
-            setSelectedWord({});
-            setDefinition('');
+        try {
+            if (selectedWord) {
+                await deleteWordDefinition.mutateAsync(selectedWord?.id);
+                alert('Word deleted successfully!');
+                setSelectedWord({});
+                setWord('');
+                setDefinition('');
+            }
+        } catch (err) {
+            alert(err);
         }
     }, [deleteWordDefinition, selectedWord]);
 
@@ -115,6 +133,7 @@ const WordDefinition: React.FC = () => {
                         onChange={handleSelectChange}
                         isClearable
                         placeholder="Select a word"
+                        value={selectedWord}
                     />
                     <button onClick={handleSearch} disabled={loading}>
                         {loading ? 'Loading...' : 'Search'}
@@ -123,12 +142,14 @@ const WordDefinition: React.FC = () => {
 
                 {error && <p className={styles.errormsg}>{error}</p>}
                 {definition && <p>Definition: {definition}</p>}
-                <EditWord
-                    definition={definition}
-                    setDefinition={setDefinition}
-                    handleEditWord={handleEditWord}
-                    handleDeleteWord={handleDeleteWord}
-                />
+                {definition && (
+                    <EditWord
+                        definition={definition}
+                        setDefinition={setDefinition}
+                        handleEditWord={handleEditWord}
+                        handleDeleteWord={handleDeleteWord}
+                    />
+                )}
             </div>
         </WordContext.Provider>
     );
